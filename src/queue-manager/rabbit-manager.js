@@ -37,7 +37,7 @@ async function initRabbit(channel, DOWNLOAD_REQUEST_EXCHANGE, DOWNLOAD_REQUEST_S
 
 async function sendMessage(channel, exchange, key, msg){
     try{
-        await channel.publish(exchange, key, JSON.stringify(msg))
+        await channel.publish(exchange, key, Buffer.from(JSON.stringify(msg)))
     } catch (ex){
         console.error(ex)
         process.exit(1)

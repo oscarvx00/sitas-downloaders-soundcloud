@@ -7,6 +7,7 @@ const fs = require('fs')
 
 const rabbitManager = require("./queue-manager/rabbit-manager")
 const minioManager = require("./internal-storage/minio-manager");
+const { Console } = require('console');
 
 
 
@@ -73,39 +74,42 @@ async function consumeDownloadRequest(msg) {
         if (!downloadRequest.direct) {
             const urlSearch = await searchSong(downloadRequest.songName)
             if (urlSearch == undefined) {
-                //TODO: resend
+                await resendRequest(downloadRequest)
                 return
             }
             url = urlSearch
         }
+        console.log(`Downloading ${url}...`)
         const downloadSongResponse = await downloadSong(url, downloadRequest.downloadId)
+        await sleep(3000)
+        console.log(`Downloaded ${url}...`)
         switch (downloadSongResponse) {
             case "Not found":
             case "Error":
-                resendRequest(downloadRequest)
+                await resendRequest(downloadRequest)
                 break
             case "OK":
                 //Save song in internal storage
                 await minioManager.uploadFile(
                     minioClient,
-                    downloadRequest.downloadId,
-                    `/tmp/${downloadRequest.downloadId}.mp3`,
+                    `${downloadRequest.downloadId}.mp3`,
+                    `${downloadRequest.downloadId}.mp3`,
                     {
-                        'Content-Type': 'audio/mpeg3'
+                        //'Content-Type': 
                     },
                     MINIO_INTERNAL_BUCKET
                 )
                 //Remove file from fs
-                fs.unlinkSync(`/tmp/${downloadRequest.downloadId}.mp3`)
+                fs.unlinkSync(`${downloadRequest.downloadId}.mp3`)
                 //Send download completed message
                 await rabbitManager.sendMessage(
                     rabbitChannel,
                     DOWNLOAD_COMPLETED_EXCHANGE,
+                    '',
                     {
                         downloadId: downloadRequest.downloadId,
                         status: 'OK'
-                    },
-                    '')
+                    })
                 break
         }
 
@@ -125,11 +129,11 @@ module.exports = {
 
 async function downloadSong(url, downloadId) {
     try {
-        let res = await scdl.download(SOUNDCLOUD_URL)
+        let res = await scdl.download(url)
         if (res?.response?.status == 404) {
             return "Not found"
         } else {
-            res.pipe(fs.createWriteStream(`/tmp/${downloadId}.mp3`))
+            await res.pipe(await fs.createWriteStream(`${downloadId}.mp3`))
             return "OK"
         }
     } catch (ex) {
@@ -183,3 +187,9 @@ async function resendRequest(downloadRequest) {
             selectedModule)
     }
 }
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
