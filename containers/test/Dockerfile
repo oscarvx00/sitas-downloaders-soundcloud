@@ -1,7 +1,8 @@
 FROM node:fermium-slim
+WORKDIR /sitas-sc-test
 
 RUN apt update
-COPY ./ ./
+COPY src/ ./
 RUN npm install
 
 ARG RABBITMQ_ENDPOINT
