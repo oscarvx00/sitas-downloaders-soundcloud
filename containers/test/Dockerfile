@@ -25,4 +25,4 @@ ENV MINIO_INTERNAL_PASS=${MINIO_INTERNAL_PASS}
 ENV MINIO_INTERNAL_BUCKET=${MINIO_INTERNAL_BUCKET}
 ENV SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
 
-ENTRYPOINT [ "npm", "test", "--", "--coverage", "--forceExit"]
+#ENTRYPOINT [ "npm", "test", "--", "--coverage", "--forceExit"]
