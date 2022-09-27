@@ -2,3 +2,4 @@ poc
 src/node_modules
 .vscode
 m.json
+src/coverage

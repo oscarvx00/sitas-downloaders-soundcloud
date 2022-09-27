@@ -1,6 +1,6 @@
 const functions = require('./soundcloud-downloader-module')
 
-const {expect, test} = require('@jest/globals');
+const {expect, test, afterAll} = require('@jest/globals');
 
 
 test('search song ok', async () => {
