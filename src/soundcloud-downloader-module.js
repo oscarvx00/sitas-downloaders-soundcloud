@@ -55,8 +55,6 @@ async function soundcloudModule() {
             DOWNLOAD_COMPLETED_EXCHANGE
         )
 
-
-
         rabbitChannel.consume(DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE, consumeDownloadRequest)
 
     } catch (ex) {
