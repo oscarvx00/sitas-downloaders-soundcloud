@@ -17,6 +17,7 @@ const DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE = process.env.DOWNLOAD_REQUEST_SOUNDCLOU
 const DOWNLOAD_COMPLETED_EXCHANGE = process.env.DOWNLOAD_COMPLETED_EXCHANGE
 
 const MINIO_INTERNAL_ENDPOINT = process.env.MINIO_INTERNAL_ENDPOINT
+const MINIO_INTERNAL_PORT = process.env.MINIO_INTERNAL_PORT
 const MINIO_INTERNAL_USER = process.env.MINIO_INTERNAL_USER
 const MINIO_INTERNAL_PASS = process.env.MINIO_INTERNAL_PASS
 const MINIO_INTERNAL_BUCKET = process.env.MINIO_INTERNAL_BUCKET
@@ -36,6 +37,7 @@ async function soundcloudModule() {
     try {
         minioClient = new minio.Client({
             endPoint: MINIO_INTERNAL_ENDPOINT,
+            port: MINIO_INTERNAL_PORT,
             accessKey: MINIO_INTERNAL_USER,
             secretKey: MINIO_INTERNAL_PASS
         })

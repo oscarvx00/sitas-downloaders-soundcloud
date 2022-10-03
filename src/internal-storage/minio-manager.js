@@ -1,6 +1,5 @@
 module.exports = {
     uploadFile,
-    uploadFile2
 }
 
 async function uploadFile(minioClient, name, filepath, metadata, bucket){
