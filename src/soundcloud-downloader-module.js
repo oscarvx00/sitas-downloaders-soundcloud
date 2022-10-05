@@ -39,7 +39,8 @@ async function soundcloudModule() {
             endPoint: MINIO_INTERNAL_ENDPOINT,
             port: MINIO_INTERNAL_PORT,
             accessKey: MINIO_INTERNAL_USER,
-            secretKey: MINIO_INTERNAL_PASS
+            secretKey: MINIO_INTERNAL_PASS,
+            useSSL: false
         })
 
     } catch (ex) {
@@ -123,7 +124,8 @@ soundcloudModule()
 
 module.exports = {
     downloadSong,
-    searchSong
+    searchSong,
+    sleep
 }
 
 
