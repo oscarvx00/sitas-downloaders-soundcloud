@@ -29,7 +29,7 @@ async function initRabbit(channel, DOWNLOAD_REQUEST_EXCHANGE, DOWNLOAD_REQUEST_S
         //TODO: Need to declare DownloadComplete exchange??
 
         return channel
-    } catch (ex) {
+    } catch (/* istanbul ignore next */ex) {
         console.error(ex)
         process.exit(1)
     }

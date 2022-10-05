@@ -11,7 +11,7 @@ async function uploadFile(minioClient, name, filepath, metadata, bucket){
             filepath,
             metadata
         )
-    } catch (ex){
+    } catch (/* istanbul ignore next */ex){
         console.error(`Error uploading file to minio ${ex}`)
         process.exit(1)
     }
