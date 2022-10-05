@@ -1,13 +1,13 @@
 const amqp = require('amqplib');
-const { channel } = require('diagnostics_channel');
 const minio = require('minio')
 const scdl = require('soundcloud-downloader').default
 const axios = require('axios')
 const fs = require('fs')
+const {randomInt} = require('crypto')
 
 const rabbitManager = require("./queue-manager/rabbit-manager")
 const minioManager = require("./internal-storage/minio-manager");
-const { Console } = require('console');
+
 
 
 
@@ -179,7 +179,7 @@ async function resendRequest(downloadRequest) {
 
         //Select module random
         const availableModules = OTHER_DOWNLOAD_MODULES.filter(it => downloadRequest[it])
-        const selectedModule = availableModules[Math.floor(Math.random() * availableModules.length)]
+        const selectedModule = availableModules[randomInt(0,availableModules.length - 1)]
 
         //Send download request
         await rabbitManager.sendMessage(
