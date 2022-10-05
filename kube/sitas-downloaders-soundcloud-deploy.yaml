@@ -23,7 +23,7 @@ spec:
             - name: RABBITMQ_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: itas-downloaders-soundcloud-secret
+                  name: sitas-downloaders-soundcloud-secret
                   key: RABBITMQ_ENDPOINT
             - name: DOWNLOAD_REQUEST_EXCHANGE
               value: sitas-prod-exchange-downloadrequest
@@ -38,17 +38,17 @@ spec:
             - name: MINIO_INTERNAL_USER
               valueFrom:
                 secretKeyRef:
-                  name: itas-downloaders-soundcloud-secret
+                  name: sitas-downloaders-soundcloud-secret
                   key: MINIO_INTERNAL_USER
             - name: MINIO_INTERNAL_PASS
               valueFrom:
                 secretKeyRef:
-                  name: itas-downloaders-soundcloud-secret
+                  name: sitas-downloaders-soundcloud-secret
                   key: MINIO_INTERNAL_PASS
             - name: MINIO_INTERNAL_BUCKET
               value: internal-storage-prod
             - name: SOUNDCLOUD_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: itas-downloaders-soundcloud-secret
+                  name: sitas-downloaders-soundcloud-secret
                   key: SOUNDCLOUD_CLIENT_ID
