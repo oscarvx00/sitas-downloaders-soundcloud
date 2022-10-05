@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sitas-downloaders-soundcloud
+  namespace: sitas
+spec:
+  selector:
+    matchLabels:
+      app: sitas-downloaders-soundcloud
+  template:
+    metadata:
+      labels:
+        app: sitas-downloaders-soundcloud
+    spec:
+      containers:
+        - name: sitas-downloaders-soundcloud
+          image: oscarvicente/sitas-downloaders-soundcloud-prod
+          resources:
+            limits:
+              memory: 1Gi
+              cpu: 1
+          env: 
+            - name: RABBITMQ_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: itas-downloaders-soundcloud-secret
+                  key: RABBITMQ_ENDPOINT
+            - name: DOWNLOAD_REQUEST_EXCHANGE
+              value: sitas-prod-exchange-downloadrequest
+            - name: DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE
+              value: sitas-prod-queue-downloadrequest-soundcloud
+            - name: DOWNLOAD_COMPLETED_EXCHANGE
+              value: sitas-prod-exchange-downloadcompleted
+            - name: MINIO_INTERNAL_ENDPOINT
+              value: oscarvx00.ddns.net
+            - name: MINIO_INTERNAL_PORT
+              value: "10000"
+            - name: MINIO_INTERNAL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: itas-downloaders-soundcloud-secret
+                  key: MINIO_INTERNAL_USER
+            - name: MINIO_INTERNAL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: itas-downloaders-soundcloud-secret
+                  key: MINIO_INTERNAL_PASS
+            - name: MINIO_INTERNAL_BUCKET
+              value: internal-storage-prod
+            - name: SOUNDCLOUD_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: itas-downloaders-soundcloud-secret
+                  key: SOUNDCLOUD_CLIENT_ID
