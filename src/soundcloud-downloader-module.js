@@ -71,7 +71,7 @@ async function consumeDownloadRequest(msg) {
     try {
         let downloadRequest = JSON.parse(msg.content)
 
-        let url
+        let url = downloadRequest.songName
         if (!downloadRequest.direct) {
             const urlSearch = await searchSong(downloadRequest.songName)
             if (urlSearch == undefined) {
