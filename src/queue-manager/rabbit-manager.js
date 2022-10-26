@@ -18,7 +18,7 @@ async function initRabbit(channel, DOWNLOAD_REQUEST_EXCHANGE, DOWNLOAD_REQUEST_S
 
         //Init DownloadRequest soundcloud queue
         await channel.assertQueue(DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE, {
-            exclusive: true,
+            exclusive: false,
             autoAck : true,
             durable: false
         })
