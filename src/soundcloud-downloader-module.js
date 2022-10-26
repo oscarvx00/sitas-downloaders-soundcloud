@@ -167,12 +167,12 @@ async function resendRequest(downloadRequest) {
         //Send download completed error
         await rabbitManager.sendMessage(
             rabbitChannel,
+            '',
             DOWNLOAD_COMPLETED_EXCHANGE,
             {
                 downloadId: downloadRequest.downloadId,
                 status: 'Error'
-            },
-            '')
+            })
     } else {
         //Deactivate soundcloud module
         downloadRequest.soundcloud = false
