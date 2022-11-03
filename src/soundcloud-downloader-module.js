@@ -90,6 +90,11 @@ async function consumeDownloadRequest(msg) {
                 await resendRequest(downloadRequest)
                 break
             case "OK":
+                //Get song name
+                const downloadName = await getSongName(url)
+                if(downloadName == undefined){
+                    break;
+                }
                 //Save song in internal storage
                 await minioManager.uploadFile(
                     minioClient,
@@ -109,7 +114,8 @@ async function consumeDownloadRequest(msg) {
                     '',
                     {
                         downloadId: downloadRequest.downloadId,
-                        status: 'OK'
+                        status: 'OK',
+                        downloadName: downloadName
                     })
                 break
         }
@@ -195,3 +201,23 @@ function sleep(ms) {
       setTimeout(resolve, ms);
     });
   }
+
+async function getSongName(url){
+    const searchStr = url.split('/')[url.split('/').length - 1]
+
+    try {
+        const url = `https://api-v2.soundcloud.com/search?&client_id=${SOUNDCLOUD_CLIENT_ID}&q=${encodeURI(searchStr)}`
+        const res = await axios.get(url)
+        if (res.status >= 400) {
+            //Return same response as it is not found if there is an error
+            console.log(`Error API searching name ${url}: ${res.status}`)
+            return undefined
+        }
+        console.log(res.data.collection.find(it => it.kind == 'track').title)
+        return res.data.collection.find(it => it.kind == "track").title
+    } catch (ex) {
+        //Return same response as it is not found if there is an error
+        console.log(`Error searching name ${url}: ${ex}`)
+        return undefined
+    }
+}

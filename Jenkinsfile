@@ -73,6 +73,7 @@ pipeline {
     
                         //Deploy in k8s, server configured
                         dir('kube'){
+                            sh 'kubectl delete deploy -n sitas sitas-downloaders-soundcloud'
                             sh 'kubectl apply -f sitas-downloaders-soundcloud-deploy.yaml'
                         }
     
