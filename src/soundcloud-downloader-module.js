@@ -214,7 +214,9 @@ async function getSongName(url){
             return undefined
         }
         console.log(res.data.collection.find(it => it.kind == 'track').title)
-        return res.data.collection.find(it => it.kind == "track").title
+        const username = res.data.collection.find(it => it.kind == "track").user.username
+        const title = res.data.collection.find(it => it.kind == "track").title
+        return `${username} - ${title}`
     } catch (ex) {
         //Return same response as it is not found if there is an error
         console.log(`Error searching name ${url}: ${ex}`)
