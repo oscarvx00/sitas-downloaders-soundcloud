@@ -4,6 +4,7 @@
   "description": "",
   "main": "soundcloud-downloader-module.js",
   "dependencies": {
+    "@azure/service-bus": "^7.7.3",
     "amqplib": "^0.10.3",
     "axios": "^0.27.2",
     "jest": "^29.0.3",
@@ -11,7 +12,7 @@
     "soundcloud-downloader": "^1.0.0"
   },
   "devDependencies": {
-    "jest" : "^29.0.3"
+    "jest": "^29.0.3"
   },
   "scripts": {
     "test": "jest"

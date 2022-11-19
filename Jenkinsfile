@@ -12,15 +12,15 @@ pipeline {
         stage('Test'){
             environment {
                 scannerHome = tool 'SonarQubeScanner'
-                RABBITMQ_ENDPOINT2 = credentials("RABBITMQ_ENDPOINT2")
+                AZURE_SERVICE_BUS_CONNECTION_STRING = credentials("AZURE_SERVICE_BUS_CONNECTION_STRING_SOUNDCLOUD")
                 MINIO_INTERNAL_ENDPOINT = "oscarvx00.ddns.net"
                 MINIO_INTERNAL_PORT = 10000
                 MINIO_INTERNAL_USER = credentials("MINIO_INTERNAL_USER")
                 MINIO_INTERNAL_PASS = credentials("MINIO_INTERNAL_PASS")
                 MINIO_INTERNAL_BUCKET = "internal-storage-test"
-                DOWNLOAD_REQUEST_EXCHANGE = "sitas-test-exchange-downloadrequest"
-                DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE = "sitas-test-queue-downloadrequest-soundcloud"
-                DOWNLOAD_COMPLETED_EXCHANGE = "sitas-test-exchange-downloadcompleted"
+                AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE = "download-request-dev-prod"
+                AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE = "download-request-soundcloud-prod"
+                AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE = "download-completed-prod"
                 SOUNDCLOUD_CLIENT_ID = credentials("SOUNDCLOUD_CLIENT_ID")
             } 
             steps {
@@ -29,15 +29,15 @@ pipeline {
                     sh 'cp -r -a containers/test/. ./'
                     sh """
                     docker build \
-                        --build-arg RABBITMQ_ENDPOINT="${RABBITMQ_ENDPOINT2}" \
+                        --build-arg AZURE_SERVICE_BUS_CONNECTION_STRING="${AZURE_SERVICE_BUS_CONNECTION_STRING}" \
                         --build-arg MINIO_INTERNAL_ENDPOINT="${MINIO_INTERNAL_ENDPOINT}" \
                         --build-arg MINIO_INTERNAL_PORT="${MINIO_INTERNAL_PORT}" \
                         --build-arg MINIO_INTERNAL_USER=${MINIO_INTERNAL_USER} \
                         --build-arg MINIO_INTERNAL_PASS=${MINIO_INTERNAL_PASS} \
                         --build-arg MINIO_INTERNAL_BUCKET=${MINIO_INTERNAL_BUCKET} \
-                        --build-arg DOWNLOAD_REQUEST_EXCHANGE=${DOWNLOAD_REQUEST_EXCHANGE} \
-                        --build-arg DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE=${DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE} \
-                        --build-arg DOWNLOAD_COMPLETED_EXCHANGE=${DOWNLOAD_COMPLETED_EXCHANGE} \
+                        --build-arg AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE=${AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE} \
+                        --build-arg AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE=${AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE} \
+                        --build-arg AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE=${AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE} \
                         --build-arg SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID} \
                         -t sitas-downloader-soundcloud-test .
                     """

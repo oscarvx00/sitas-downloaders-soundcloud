@@ -20,17 +20,17 @@ spec:
               memory: 1Gi
               cpu: 1
           env: 
-            - name: RABBITMQ_ENDPOINT
+            - name: AZURE_SERVICE_BUS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
                   name: sitas-downloaders-soundcloud-secret
-                  key: RABBITMQ_ENDPOINT
-            - name: DOWNLOAD_REQUEST_EXCHANGE
-              value: sitas-prod-exchange-downloadrequest
-            - name: DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE
-              value: sitas-prod-queue-downloadrequest-soundcloud
-            - name: DOWNLOAD_COMPLETED_EXCHANGE
-              value: sitas-prod-exchange-downloadcompleted
+                  key: AZURE_SERVICE_BUS_CONNECTION_STRING
+            - name: AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE
+              value: download-request-dev-prod
+            - name: AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE
+              value: download-request-soundcloud-prod
+            - name: AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE
+              value: download-completed-prod
             - name: MINIO_INTERNAL_ENDPOINT
               value: oscarvx00.ddns.net
             - name: MINIO_INTERNAL_PORT

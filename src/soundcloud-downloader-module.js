@@ -5,16 +5,9 @@ const axios = require('axios')
 const fs = require('fs')
 const {randomInt} = require('crypto')
 
-const rabbitManager = require("./queue-manager/rabbit-manager")
 const minioManager = require("./internal-storage/minio-manager");
+const azureServiceBusManager = require("./queue-manager/azure-service-bus-manager")
 
-
-
-
-const RABBITMQ_ENDPOINT = process.env.RABBITMQ_ENDPOINT
-const DOWNLOAD_REQUEST_EXCHANGE = process.env.DOWNLOAD_REQUEST_EXCHANGE
-const DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE = process.env.DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE
-const DOWNLOAD_COMPLETED_EXCHANGE = process.env.DOWNLOAD_COMPLETED_EXCHANGE
 
 const MINIO_INTERNAL_ENDPOINT = process.env.MINIO_INTERNAL_ENDPOINT
 const MINIO_INTERNAL_PORT = Number(process.env.MINIO_INTERNAL_PORT)
@@ -24,12 +17,14 @@ const MINIO_INTERNAL_BUCKET = process.env.MINIO_INTERNAL_BUCKET
 
 const SOUNDCLOUD_CLIENT_ID = process.env.SOUNDCLOUD_CLIENT_ID
 
-const OTHER_DOWNLOAD_MODULES = ["spotify", "youtube"]
+const AZURE_SERVICE_BUS_CONNECTION_STRING = process.env.AZURE_SERVICE_BUS_CONNECTION_STRING
+const AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE = process.env.AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE
+const AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE = process.env.AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE
+const AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE = process.env.AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE
 
 
 let minioClient
-let rabbitConn
-let rabbitChannel
+let azureServiceBusClient
 
 
 async function soundcloudModule() {
@@ -48,31 +43,37 @@ async function soundcloudModule() {
         process.exit(1)
     }
 
-    try {
-        rabbitConn = await amqp.connect(RABBITMQ_ENDPOINT)
-        rabbitChannel = await rabbitConn.createChannel()
-        await rabbitManager.initRabbit(
-            rabbitChannel,
-            DOWNLOAD_REQUEST_EXCHANGE,
-            DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE,
-            DOWNLOAD_COMPLETED_EXCHANGE
-        )
+    try{
+        azureServiceBusClient = azureServiceBusManager.initAzureServiceBusClient(AZURE_SERVICE_BUS_CONNECTION_STRING)
+        
 
-        rabbitChannel.consume(DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE, consumeDownloadRequest, {noAck: true})
+        const receiver = azureServiceBusClient.createReceiver(AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_SOUNDCLOUD_QUEUE)
+        receiver.subscribe({
+            processMessage: consumeDownloadRequest,
+            processError: azureServiceBusErrorHandler
+        })
 
-    } catch (ex) {
-        console.error(`Error connecting to rabbit: ${ex}`)
+    } catch(ex){
+        console.error(`Error connecing to Azure Service Bus: ${ex}`)
         process.exit(1)
     }
 
+    console.log("Init completed, listening messages")
+
+}
+
+async function azureServiceBusErrorHandler(error){
+    console.error(`Azure service bus error: ${error}`)
 }
 
 async function consumeDownloadRequest(msg) {
     try {
-        let downloadRequest = JSON.parse(msg.content)
-
+        console.log(msg.body)
+        let downloadRequest = msg.body
+        //let downloadRequest = msg.body.toString()
         let url = downloadRequest.songName
         if (!downloadRequest.direct) {
+            console.log(downloadRequest.songName)
             const urlSearch = await searchSong(downloadRequest.songName)
             if (urlSearch == undefined) {
                 await resendRequest(downloadRequest)
@@ -108,20 +109,21 @@ async function consumeDownloadRequest(msg) {
                 //Remove file from fs
                 fs.unlinkSync(`${downloadRequest.downloadId}.mp3`)
                 //Send download completed message
-                await rabbitManager.sendMessage(
-                    rabbitChannel,
-                    DOWNLOAD_COMPLETED_EXCHANGE,
-                    '',
+                    
+                await azureServiceBusManager.sendMessage(
+                    azureServiceBusClient,
                     {
                         downloadId: downloadRequest.downloadId,
                         status: 'OK',
                         downloadName: downloadName
-                    })
+                    },
+                    AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE
+                )
                 break
         }
 
     } catch (ex) {
-        console.log(`Error processing download request`)
+        console.log(`Error processing download request: ${ex}`)
     }
 }
 
@@ -169,31 +171,12 @@ async function searchSong(name) {
 
 async function resendRequest(downloadRequest) {
 
-    if (!OTHER_DOWNLOAD_MODULES.filter(it => downloadRequest[it]).length) {
-        //Send download completed error
-        await rabbitManager.sendMessage(
-            rabbitChannel,
-            '',
-            DOWNLOAD_COMPLETED_EXCHANGE,
-            {
-                downloadId: downloadRequest.downloadId,
-                status: 'Error'
-            })
-    } else {
-        //Deactivate soundcloud module
-        downloadRequest.soundcloud = false
-
-        //Select module random
-        const availableModules = OTHER_DOWNLOAD_MODULES.filter(it => downloadRequest[it])
-        const selectedModule = availableModules[randomInt(0,availableModules.length - 1)]
-
-        //Send download request
-        await rabbitManager.sendMessage(
-            rabbitChannel,
-            DOWNLOAD_REQUEST_EXCHANGE,
-            downloadRequest,
-            selectedModule)
-    }
+    downloadRequest.soundcloud = false
+    await azureServiceBusManager.sendMessage(
+        azureServiceBusClient,
+        downloadRequest,
+        AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE
+    )
 }
 
 function sleep(ms) {
