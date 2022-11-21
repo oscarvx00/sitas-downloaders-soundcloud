@@ -94,6 +94,7 @@ async function consumeDownloadRequest(msg) {
                 //Get song name
                 const downloadName = await getSongName(url)
                 if(downloadName == undefined){
+                    await resendRequest(downloadRequest)
                     break;
                 }
                 //Save song in internal storage

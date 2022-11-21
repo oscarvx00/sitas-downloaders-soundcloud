@@ -5,7 +5,7 @@ const fs = require('fs');
 const { assert } = require('console');
 
 const TEST_SONG_NAME = "Oliver Heldens - Gecko"
-const TEST_SONG_URL = "https://soundcloud.com/ffrr-records/oliver-heldens-x-becky-hill-gecko-overdrive-radio"
+const TEST_SONG_URL = "https://soundcloud.com/oliverheldens/gecko-out-now"
 
 
 
