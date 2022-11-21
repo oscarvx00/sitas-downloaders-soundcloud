@@ -172,11 +172,24 @@ async function searchSong(name) {
 async function resendRequest(downloadRequest) {
 
     downloadRequest.soundcloud = false
-    await azureServiceBusManager.sendMessage(
-        azureServiceBusClient,
-        downloadRequest,
-        AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE
-    )
+
+    if(downloadRequest.soundcloud || downloadRequest.spotify){
+        await azureServiceBusManager.sendMessage(
+            azureServiceBusClient,
+            downloadRequest,
+            AZURE_SERVICE_BUS_DOWNLOAD_REQUEST_QUEUE
+        )
+    } else {
+        await azureServiceBusManager.sendMessage(
+            azureServiceBusClient,
+            {
+                downloadId: downloadRequest.downloadId,
+                status: 'Error',
+            },
+            AZURE_SERVICE_BUS_DOWNLOAD_COMPLETED_QUEUE
+        )
+    }
+    
 }
 
 function sleep(ms) {
