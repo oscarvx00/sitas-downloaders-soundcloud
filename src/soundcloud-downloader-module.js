@@ -161,7 +161,7 @@ async function searchSong(name) {
             console.log(`Error API searching ${name}: ${res.status}`)
             return undefined
         }
-        return res.data.collection.find(it => it.kind == "track").permalink_url
+        return res.data.collection.find(it => it.kind == "track")?.permalink_url
     } catch (ex) {
         //Return same response as it is not found if there is an error
         console.log(`Error searching ${name}: ${ex}`)
